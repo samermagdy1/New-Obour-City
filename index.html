@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="سكنى – منصة العبور والعبور الجديدة للأثاث والأجهزة والصنايعية" />
-  <title>سكنى</title> 
+  <title>سكنى | – العبور والعبور الجديدة</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
@@ -658,11 +658,17 @@
     #lightbox {
       position: fixed; inset: 0; z-index: 2000;
       background: #000;
-      display: none; flex-direction: column;
+      display: flex; flex-direction: column;
       opacity: 0;
-      transition: opacity .25s var(--ease);
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .22s var(--ease), visibility 0s linear .22s;
     }
-    #lightbox.open { display: flex; }
+    #lightbox.open {
+      visibility: visible;
+      pointer-events: all;
+      transition: opacity .22s var(--ease), visibility 0s linear 0s;
+    }
     #lightbox.visible { opacity: 1; }
 
     /* ── full-screen image stage ── */
@@ -1153,7 +1159,7 @@
     <div class="header-row">
       <a href="#" class="logo" aria-label="سكنى – الرئيسية">
         <div class="logo-en">سكنى <span>|</span> Sakny</div>
-        <div class="logo-ar">مجتمعك في بيتك</div>
+        <div class="logo-ar">الأقرب اليك</div>
       </a>
 
       <div class="location-badge" aria-label="المنطقة المخدومة">
@@ -1205,7 +1211,7 @@
   <div class="drawer-head">
     <div class="logo">
       <div class="logo-en">سكنى <span style="color:var(--accent)">|</span> Sakny</div>
-      <div class="logo-ar">الأقرب اليك</div>
+      <div class="logo-ar">مجتمعك في بيتك</div>
     </div>
     <button class="drawer-close" id="drawer-close-btn" aria-label="إغلاق القائمة">✕</button>
   </div>
@@ -1770,10 +1776,16 @@ function openLightbox(product, startIdx) {
   lbIdx = startIdx || 0;
   lbCat = product.cat;
   lbProductTitle = product.title;
-  const lb = document.getElementById('lightbox');
-  lb.classList.add('open');
+
+  // Lock scroll FIRST – before any class changes
   document.body.style.overflow = 'hidden';
+
+  const lb = document.getElementById('lightbox');
+  // Render content while still invisible
   renderLightbox();
+  // Make visible
+  lb.classList.add('open');
+  // Force a paint, then fade in
   requestAnimationFrame(() => {
     requestAnimationFrame(() => lb.classList.add('visible'));
   });
@@ -1794,7 +1806,7 @@ function closeLightbox() {
   setTimeout(() => {
     lb.classList.remove('open');
     document.body.style.overflow = '';
-  }, 260);
+  }, 240);
 }
 
 function renderLightbox() {
