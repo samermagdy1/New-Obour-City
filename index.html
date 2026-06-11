@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -515,21 +515,66 @@
 
     /* Image area */
     .card-imgs {
-      position: relative; height: 145px; overflow: hidden;
+      position: relative; height: 180px; overflow: hidden;
       background: var(--surface);
       cursor: pointer;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
     }
-    @media (min-width: 640px) { .card-imgs { height: 165px; } }
+    @media (min-width: 640px) { .card-imgs { height: 200px; } }
+
+    /* Shimmer loading skeleton */
+    .card-img-skeleton {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      z-index: 0;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     .card-img-main {
-      width: 100%; height: 100%; object-fit: cover;
+      width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 42px; transition: transform .4s var(--ease);
+      font-size: 42px; transition: transform .45s var(--ease);
+      position: relative; z-index: 1;
+    }
+    .card-img-main img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+      transition: transform .45s var(--ease), opacity .35s;
+      opacity: 0;
+      position: absolute; inset: 0;
+    }
+    .card-img-main img.loaded { opacity: 1; }
+    .card-img-main .img-fallback-icon {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px; z-index: 1;
     }
     .card-img-main.furniture  { background: linear-gradient(135deg,#E8F4FB,#C8E4F5); }
     .card-img-main.appliances { background: linear-gradient(135deg,#FEF7E6,#FDEBD0); }
     .card-img-main.lighting   { background: linear-gradient(135deg,#F3EEF8,#E5D8F4); }
     .card-img-main.workers    { background: linear-gradient(135deg,#E8F8F0,#D0F0E0); }
-    .card-imgs:hover .card-img-main { transform: scale(1.04); }
+
+    .card-imgs:hover .card-img-main img,
+    .card-imgs:hover .card-img-main { transform: scale(1.06); }
+
+    /* dot strip for multi-image */
+    .card-img-dots {
+      position: absolute; bottom: 10px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 5px; z-index: 3;
+    }
+    .card-img-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,.55);
+      cursor: pointer;
+      transition: background var(--t-fast), transform var(--t-fast);
+    }
+    .card-img-dot.active { background: #fff; transform: scale(1.35); }
 
     .img-counter {
       position: absolute; bottom: 8px; left: 8px;
@@ -538,6 +583,16 @@
       font-size: 11px; font-weight: 700;
       display: flex; align-items: center; gap: 4px;
       backdrop-filter: blur(4px);
+    }
+
+    /* Worker name badge on card image */
+    .worker-name-badge {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(14,138,122,.88);
+      color: #fff; border-radius: var(--r-pill);
+      padding: 4px 11px; font-size: 11px; font-weight: 700;
+      backdrop-filter: blur(4px);
+      z-index: 2;
     }
     .cond-badge {
       position: absolute; top: 9px; right: 9px;
@@ -627,12 +682,19 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 80px;
       box-shadow: var(--sh-xl);
+      position: relative;
     }
     .lb-stage.furniture  { background: linear-gradient(135deg,#E8F4FB,#C8E4F5); }
     .lb-stage.appliances { background: linear-gradient(135deg,#FEF7E6,#FDEBD0); }
     .lb-stage.lighting   { background: linear-gradient(135deg,#F3EEF8,#E5D8F4); }
     .lb-stage.workers    { background: linear-gradient(135deg,#E8F8F0,#D0F0E0); }
-    .lb-stage img { width: 100%; height: 100%; object-fit: cover; }
+    .lb-stage img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .lb-stage .lb-img-loading {
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg,#2a2a2a 25%,#3a3a3a 50%,#2a2a2a 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
 
     .lb-nav {
       position: absolute; top: 50%; transform: translateY(-50%);
@@ -823,21 +885,40 @@
     .img-upload-area .ua-sub { font-size: 11px; color: var(--text-soft); margin-top: 3px; }
     .img-upload-area input[type="file"] { display: none; }
     .img-preview-row {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
     }
     .img-thumb {
-      width: 60px; height: 60px; border-radius: var(--r-sm);
-      background: var(--surface); border: 1px solid var(--border);
+      width: 80px; height: 80px; border-radius: var(--r-md);
+      background: var(--surface); border: 2px solid var(--border);
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; overflow: hidden; position: relative;
+      transition: border-color var(--t-fast), transform var(--t-fast);
+      flex-shrink: 0;
     }
+    .img-thumb:hover { border-color: var(--primary); transform: scale(1.04); }
     .img-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .img-thumb .rm-thumb {
-      position: absolute; top: -5px; right: -5px;
-      width: 18px; height: 18px; background: var(--danger);
-      color: #fff; border: none; border-radius: 50%;
-      font-size: 10px; cursor: pointer;
+      position: absolute; top: -6px; right: -6px;
+      width: 20px; height: 20px; background: var(--danger);
+      color: #fff; border: 2px solid #fff; border-radius: 50%;
+      font-size: 9px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--sh-xs);
+    }
+
+    /* Web Share API banner */
+    .share-api-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: var(--r-md);
+      font-size: 12.5px; font-weight: 700; margin-bottom: 14px;
+    }
+    .share-api-banner.supported {
+      background: #E6F7EE; color: var(--success);
+      border: 1px solid rgba(30,140,90,.25);
+    }
+    .share-api-banner.unsupported {
+      background: #FEF5E7; color: #C05700;
+      border: 1px solid rgba(200,100,0,.2);
     }
 
     /* ══════════════════════════════════════
@@ -1352,6 +1433,9 @@
         اختر نوع تسجيلك وأرسل تفاصيل عرضك — هنراجعه ونضيفه للموقع خلال 24 ساعة ✅
       </p>
 
+      <!-- Web Share API indicator – injected by JS -->
+      <div id="share-api-banner"></div>
+
       <!-- type selector -->
       <div class="join-type-btns" id="join-type-btns">
         <div class="join-type-btn selected" data-type="seller">
@@ -1444,73 +1528,114 @@ const PRODUCTS = [
     id:1, cat:'furniture', title:'غرفة نوم كاملة مستعملة – نظيفة جداً',
     cond:'مستعمل', condCls:'cond-used', price:'8,500 جنيه',
     loc:'العبور الجديدة', rating:4, revs:12, icon:'🛏️',
-    imgs:[{type:'emoji',v:'🛏️'},{type:'emoji',v:'🪞'},{type:'emoji',v:'🚪'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&q=80'}
+    ]
   },
   {
     id:2, cat:'furniture', title:'طقم صالون جديد – 7 قطع نيو كلاسيك',
     cond:'جديد', condCls:'cond-new', price:'22,000 جنيه',
     loc:'العبور', rating:5, revs:8, icon:'🛋️',
-    imgs:[{type:'emoji',v:'🛋️'},{type:'emoji',v:'🖼️'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=600&q=80'}
+    ]
   },
   {
     id:3, cat:'furniture', title:'مكتبة خشب زان بـ 5 أرفف – تفصيل',
     cond:'جديد', condCls:'cond-new', price:'3,200 جنيه',
     loc:'إسكان العبور', rating:4, revs:5, icon:'📚',
-    imgs:[{type:'emoji',v:'📚'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&fit=crop&crop=faces'}
+    ]
   },
   {
     id:4, cat:'furniture', title:'سرير أطفال مستعمل مع مرتبة',
     cond:'مستعمل', condCls:'cond-used', price:'1,800 جنيه',
     loc:'العبور الجديدة', rating:3, revs:3, icon:'🛏️',
-    imgs:[{type:'emoji',v:'🛏️'},{type:'emoji',v:'🧸'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=600&q=80'}
+    ]
   },
   {
     id:5, cat:'appliances', title:'ثلاجة سامسونج نوفروست 450 لتر',
     cond:'جديد', condCls:'cond-new', price:'18,500 جنيه',
     loc:'العبور', rating:5, revs:21, icon:'❄️',
-    imgs:[{type:'emoji',v:'❄️'},{type:'emoji',v:'🧊'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=600&q=80'}
+    ]
   },
   {
     id:6, cat:'appliances', title:'غسالة LG أوتوماتيك 9 كيلو – بها كفالة',
     cond:'جديد', condCls:'cond-new', price:'14,200 جنيه',
     loc:'العبور', rating:5, revs:17, icon:'🌀',
-    imgs:[{type:'emoji',v:'🌀'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80'}
+    ]
   },
   {
     id:7, cat:'appliances', title:'تكييف كارير 1.5 حصان – استعمال سنتين',
     cond:'مستعمل', condCls:'cond-used', price:'6,500 جنيه',
     loc:'العبور الجديدة', rating:4, revs:9, icon:'❄️',
-    imgs:[{type:'emoji',v:'❄️'},{type:'emoji',v:'🌡️'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1592210454359-9043f067919b?w=600&q=80'}
+    ]
   },
   {
     id:8, cat:'appliances', title:'شاشة Samsung 55 بوصة 4K QLED',
     cond:'جديد', condCls:'cond-new', price:'25,000 جنيه',
     loc:'إسكان العبور', rating:5, revs:14, icon:'📺',
-    imgs:[{type:'emoji',v:'📺'},{type:'emoji',v:'🎮'},{type:'emoji',v:'🎬'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1461151304267-38535e780c79?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1601944177325-f8867652837f?w=600&q=80'}
+    ]
   },
   {
     id:9, cat:'lighting', title:'نجفة LED حديثة – ذهبي وأبيض 80 سم',
     cond:'جديد', condCls:'cond-new', price:'2,400 جنيه',
     loc:'العبور الجديدة', rating:4, revs:6, icon:'💫',
-    imgs:[{type:'emoji',v:'💫'},{type:'emoji',v:'✨'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1513506003901-1e6a35c2a2da?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=600&q=80'}
+    ]
   },
   {
     id:10, cat:'lighting', title:'إضاءة ممر LED ذكية – متوافقة Alexa',
     cond:'جديد', condCls:'cond-new', price:'890 جنيه',
     loc:'العبور', rating:4, revs:11, icon:'💡',
-    imgs:[{type:'emoji',v:'💡'}]
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop&crop=center'},
+      {type:'url',v:'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?w=600&q=80'}
+    ]
   },
   {
     id:11, cat:'workers', title:'سباك معتمد – كشف وإصلاح فوري',
     cond:'خدمة', condCls:'cond-service', price:'اتصل للسعر',
     loc:'العبور والعبور الجديدة', rating:5, revs:34, icon:'🔧',
-    imgs:[{type:'emoji',v:'🔧'},{type:'emoji',v:'🚿'}]
+    workerName:'أحمد حسن', workerExp:'12 سنة خبرة',
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop&crop=top'}
+    ]
   },
   {
     id:12, cat:'workers', title:'كهربائي خبرة 10 سنوات – توصيلات وصيانة',
     cond:'خدمة', condCls:'cond-service', price:'اتصل للسعر',
     loc:'جميع مناطق العبور', rating:5, revs:28, icon:'⚡',
-    imgs:[{type:'emoji',v:'⚡'},{type:'emoji',v:'🔌'}]
+    workerName:'محمد السيد', workerExp:'10 سنوات خبرة',
+    imgs:[
+      {type:'url',v:'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=80'},
+      {type:'url',v:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop&crop=entropy'}
+    ]
   }
 ];
 
@@ -1565,9 +1690,20 @@ function renderLightbox() {
 
   // clear classes
   stage.className = 'lb-stage ' + lbCat;
-  stage.innerHTML = img.type === 'emoji'
-    ? img.v
-    : `<img src="${img.v}" alt="${lbProductTitle}" loading="lazy" />`;
+
+  if (img.type === 'url') {
+    stage.innerHTML = `<div class="lb-img-loading"></div><img src="${img.v}" alt="${lbProductTitle}" loading="lazy" style="opacity:0;transition:opacity .3s" />`;
+    const imgEl = stage.querySelector('img');
+    const onLoad = () => {
+      imgEl.style.opacity = '1';
+      const loader = stage.querySelector('.lb-img-loading');
+      if (loader) loader.style.opacity = '0';
+    };
+    if (imgEl.complete && imgEl.naturalWidth) onLoad();
+    else imgEl.addEventListener('load', onLoad);
+  } else {
+    stage.innerHTML = img.v;
+  }
 
   dots.innerHTML = lbImages.map((_, i) =>
     `<div class="lb-dot${i===lbIdx?' active':''}" data-i="${i}"></div>`
@@ -1612,13 +1748,34 @@ function cardHTML(p) {
     ? `<span class="price-call">📞 اتصل للسعر</span>`
     : `<div class="card-price">${p.price}</div>`;
   const imgCount = p.imgs.length;
+  const firstImg = p.imgs[0];
+
+  // Worker badge
+  const workerBadge = p.cat === 'workers' && p.workerName
+    ? `<div class="worker-name-badge">👤 ${p.workerName}</div>`
+    : '';
+
+  // Dots for multi-image
+  const dotsHTML = imgCount > 1
+    ? `<div class="card-img-dots">${p.imgs.map((_,i)=>`<div class="card-img-dot${i===0?' active':''}"></div>`).join('')}</div>`
+    : '';
+
+  const imgHTML = firstImg.type === 'url'
+    ? `<div class="card-img-skeleton"></div>
+       <div class="card-img-main ${p.cat}">
+         <span class="img-fallback-icon">${p.icon}</span>
+         <img src="${firstImg.v}" alt="${p.title}" loading="lazy" />
+       </div>`
+    : `<div class="card-img-main ${p.cat}">${firstImg.v}</div>`;
 
   return `<article class="listing-card" data-id="${p.id}">
     <div class="card-imgs" role="button" tabindex="0"
       aria-label="عرض صور ${p.title}"
       data-product-id="${p.id}">
-      <div class="card-img-main ${p.cat}">${p.icon}</div>
+      ${imgHTML}
+      ${workerBadge}
       ${imgCount>1?`<div class="img-counter">📷 ${imgCount}</div>`:''}
+      ${dotsHTML}
       <span class="cond-badge ${p.condCls}">${p.cond}</span>
     </div>
     <div class="card-body">
@@ -1675,9 +1832,53 @@ function renderListings() {
         </div>`;
       } else {
         grid.innerHTML = filtered.map(cardHTML).join('');
-        // Image click
+
+        // Wire lazy images – fade in on load, remove skeleton
+        grid.querySelectorAll('.card-img-main img').forEach(img => {
+          const onLoad = () => {
+            img.classList.add('loaded');
+            // hide fallback icon once real image loads
+            const icon = img.parentElement.querySelector('.img-fallback-icon');
+            if (icon) icon.style.opacity = '0';
+            // remove skeleton
+            const sk = img.closest('.card-imgs').querySelector('.card-img-skeleton');
+            if (sk) sk.style.opacity = '0';
+          };
+          if (img.complete && img.naturalWidth) { onLoad(); }
+          else { img.addEventListener('load', onLoad); }
+          img.addEventListener('error', () => {
+            img.style.display = 'none';
+            const sk = img.closest('.card-imgs').querySelector('.card-img-skeleton');
+            if (sk) sk.style.opacity = '0';
+          });
+        });
+
+        // Wire image dot cycling on card (preview multi-images without opening lightbox)
+        grid.querySelectorAll('.card-imgs').forEach(cardImgsEl => {
+          const dots = cardImgsEl.querySelectorAll('.card-img-dot');
+          if (!dots.length) return;
+          const pid = +cardImgsEl.dataset.productId;
+          const p = PRODUCTS.find(x => x.id === pid);
+          if (!p) return;
+          dots.forEach((dot, i) => {
+            dot.addEventListener('click', (e) => {
+              e.stopPropagation(); // prevent lightbox open
+              dots.forEach(d => d.classList.remove('active'));
+              dot.classList.add('active');
+              const imgEl = cardImgsEl.querySelector('.card-img-main img');
+              if (!imgEl) return;
+              imgEl.classList.remove('loaded');
+              imgEl.src = p.imgs[i].v;
+              imgEl.onload = () => imgEl.classList.add('loaded');
+            });
+          });
+        });
+
+        // Image click → lightbox
         grid.querySelectorAll('[data-product-id]').forEach(el => {
           const handler = (e) => {
+            // Don't open lightbox if a dot was clicked
+            if (e.target.classList.contains('card-img-dot')) return;
             e.preventDefault();
             const p = PRODUCTS.find(x => x.id === +el.dataset.productId);
             if (p) openLightbox(p, 0);
@@ -1685,6 +1886,7 @@ function renderListings() {
           el.addEventListener('click', handler);
           el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') handler(e); });
         });
+
         // WA buttons
         grid.querySelectorAll('.wa-card-btn').forEach(btn => {
           btn.addEventListener('click', () => window.open(btn.dataset.url, '_blank'));
@@ -1899,6 +2101,17 @@ function initJoin() {
       closeJoinModal();
   });
 
+  // Web Share API banner
+  const banner = document.getElementById('share-api-banner');
+  if (banner) {
+    const canShareFiles = navigator.canShare && navigator.canShare({ files: [new File([''], 'test.jpg', { type: 'image/jpeg' })] });
+    if (canShareFiles) {
+      banner.innerHTML = `<div class="share-api-banner supported">📲 جهازك يدعم إرسال الصور تلقائياً مع الطلب ✅</div>`;
+    } else {
+      banner.innerHTML = `<div class="share-api-banner unsupported">📎 الصور ترسل كرابط – يرجى إرفاقها يدوياً في واتساب بعد الإرسال</div>`;
+    }
+  }
+
   // type selector
   document.getElementById('join-type-btns').querySelectorAll('.join-type-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1940,7 +2153,7 @@ function initJoin() {
   });
 
   // submit
-  document.getElementById('join-submit-btn').addEventListener('click', () => {
+  document.getElementById('join-submit-btn').addEventListener('click', async () => {
     const phone_re = /^(010|011|012|015)\d{8}$/;
     const name  = document.getElementById('jf-name').value.trim();
     const phone = document.getElementById('jf-phone').value.trim().replace(/\s/g,'');
@@ -1964,7 +2177,7 @@ function initJoin() {
     const catLabel = CAT_LABELS[cat] || cat;
     const hasImgs = uploadedFiles.length > 0;
 
-    const msg = `🏪 طلب انضمام جديد – منصة سكنى العبور\n` +
+    const msgText = `🏪 طلب انضمام جديد – منصة سكنى العبور\n` +
       `النوع: ${typeLabel}\n` +
       `الاسم: ${name}\n` +
       `الواتساب: ${phone}\n` +
@@ -1973,11 +2186,54 @@ function initJoin() {
       (price ? `السعر: ${price}\n` : '') +
       (area  ? `المنطقة: ${area}\n`  : '') +
       `الوصف: ${desc}\n` +
-      (hasImgs ? `📷 سيرسل ${uploadedFiles.length} صورة للمنتج/الخدمة\n` : '') +
       `\nشكراً ✅`;
 
+    const btn = document.getElementById('join-submit-btn');
+    btn.disabled = true;
+    btn.style.opacity = '.7';
+
+    // Try Web Share API with files first
+    if (hasImgs && navigator.canShare) {
+      try {
+        // Convert files to proper File objects for sharing
+        const shareFiles = uploadedFiles.map((f, i) => {
+          const ext = f.name.split('.').pop() || 'jpg';
+          return new File([f], `صورة-${ttl.replace(/\s+/g,'-')}-${i+1}.${ext}`, { type: f.type });
+        });
+        const shareData = { text: msgText, files: shareFiles };
+        if (navigator.canShare(shareData)) {
+          closeJoinModal();
+          await navigator.share(shareData);
+          btn.disabled = false; btn.style.opacity = '';
+          return;
+        }
+      } catch(e) {
+        // user cancelled or share failed – fall through to wa.me
+        if (e.name === 'AbortError') { btn.disabled = false; btn.style.opacity = ''; return; }
+      }
+    }
+
+    // Fallback: open WhatsApp URL (images can't be attached this way, notify user)
     closeJoinModal();
-    window.open(waURL(msg), '_blank');
+    btn.disabled = false; btn.style.opacity = '';
+    window.open(waURL(msgText), '_blank');
+
+    // If there were images and share API wasn't used, show a hint
+    if (hasImgs) {
+      setTimeout(() => {
+        const hint = document.createElement('div');
+        hint.style.cssText = `position:fixed;bottom:24px;right:24px;left:24px;max-width:400px;margin:0 auto;
+          background:#1E8C5A;color:#fff;border-radius:14px;padding:14px 18px;
+          font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;
+          box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:9999;
+          display:flex;align-items:center;gap:10px;direction:rtl;`;
+        hint.innerHTML = `<span style="font-size:20px">📷</span>
+          <span>تم إرسال الطلب ✅ — يرجى إرسال الصور (${uploadedFiles.length}) يدوياً في المحادثة على واتساب</span>
+          <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;margin-right:auto;">✕</button>`;
+        document.body.appendChild(hint);
+        setTimeout(() => hint.remove(), 7000);
+      }, 800);
+    }
   });
 }
 
