@@ -653,83 +653,166 @@
     .empty-sub { font-size: 14px; color: var(--text-mid); margin-bottom: 20px; }
 
     /* ══════════════════════════════════════
-       IMAGE LIGHTBOX
+       IMAGE LIGHTBOX  – full-screen immersive
     ══════════════════════════════════════ */
     #lightbox {
       position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,.92);
+      background: #000;
       display: none; flex-direction: column;
-      align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity .25s var(--ease);
     }
     #lightbox.open { display: flex; }
-    .lb-close {
-      position: absolute; top: 16px; right: 20px;
-      background: rgba(255,255,255,.15); border: none;
-      color: #fff; font-size: 24px;
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background var(--t-fast);
-      z-index: 10;
-    }
-    .lb-close:hover { background: rgba(255,255,255,.28); }
-    .lb-inner {
-      max-width: min(90vw, 700px);
-      width: 100%; position: relative;
-    }
+    #lightbox.visible { opacity: 1; }
+
+    /* ── full-screen image stage ── */
     .lb-stage {
-      width: 100%; aspect-ratio: 4/3;
-      border-radius: var(--r-lg); overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 80px;
-      box-shadow: var(--sh-xl);
+      flex: 1;
+      width: 100%; height: 100%;
       position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      font-size: 100px;
     }
-    .lb-stage.furniture  { background: linear-gradient(135deg,#E8F4FB,#C8E4F5); }
-    .lb-stage.appliances { background: linear-gradient(135deg,#FEF7E6,#FDEBD0); }
-    .lb-stage.lighting   { background: linear-gradient(135deg,#F3EEF8,#E5D8F4); }
-    .lb-stage.workers    { background: linear-gradient(135deg,#E8F8F0,#D0F0E0); }
-    .lb-stage img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .lb-stage.furniture  { background: #0d1a22; }
+    .lb-stage.appliances { background: #1a1200; }
+    .lb-stage.lighting   { background: #130d1f; }
+    .lb-stage.workers    { background: #061410; }
+
+    .lb-stage img {
+      max-width: 100%; max-height: 100%;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: block;
+      opacity: 0;
+      transition: opacity .3s var(--ease);
+      position: absolute; inset: 0;
+    }
+    .lb-stage img.lb-loaded { opacity: 1; }
     .lb-stage .lb-img-loading {
       position: absolute; inset: 0;
-      background: linear-gradient(90deg,#2a2a2a 25%,#3a3a3a 50%,#2a2a2a 75%);
+      background: linear-gradient(90deg,#111 25%,#222 50%,#111 75%);
       background-size: 200% 100%;
       animation: shimmer 1.4s infinite;
+      z-index: 1;
+    }
+    .lb-stage .lb-img-loading.hidden { opacity: 0; transition: opacity .2s; }
+
+    /* swipe hint overlay – shown briefly on first open */
+    .lb-swipe-hint {
+      position: absolute; bottom: 70px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.6); color: rgba(255,255,255,.75);
+      backdrop-filter: blur(6px);
+      border-radius: var(--r-pill); padding: 7px 18px;
+      font-size: 12px; font-weight: 700; white-space: nowrap;
+      pointer-events: none; z-index: 5;
+      opacity: 0; transition: opacity .4s;
+    }
+    .lb-swipe-hint.show { opacity: 1; }
+
+    /* ── top bar ── */
+    .lb-topbar {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 64px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.75) 0%, transparent 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .lb-topbar > * { pointer-events: all; }
+
+    .lb-close {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      color: #fff; font-size: 20px;
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background var(--t-fast), transform var(--t-fast);
+      backdrop-filter: blur(8px);
+    }
+    .lb-close:hover { background: rgba(255,255,255,.25); transform: scale(1.08); }
+
+    .lb-topbar-info {
+      flex: 1; text-align: center; padding: 0 8px;
+    }
+    .lb-title {
+      color: #fff; font-size: 14px; font-weight: 800;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 240px; margin: 0 auto;
+    }
+    @media (min-width: 480px) { .lb-title { max-width: 340px; } }
+    .lb-counter-text {
+      color: rgba(255,255,255,.5); font-size: 11px; font-weight: 600; margin-top: 1px;
     }
 
-    .lb-nav {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(255,255,255,.2); border: none;
-      color: #fff; font-size: 22px;
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background var(--t-fast);
-    }
-    .lb-nav:hover { background: rgba(255,255,255,.35); }
-    .lb-prev { left: -56px; }
-    .lb-next { right: -56px; }
-    @media (max-width: 640px) {
-      .lb-prev { left: -44px; }
-      .lb-next { right: -44px; }
-      .lb-inner { max-width: 80vw; }
+    /* ── bottom bar ── */
+    .lb-bottombar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 16px 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      background: linear-gradient(to top, rgba(0,0,0,.8) 0%, transparent 100%);
+      z-index: 10;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
     }
 
     .lb-dots {
-      display: flex; gap: 8px; justify-content: center;
-      margin-top: 16px;
+      display: flex; gap: 7px; justify-content: center;
     }
     .lb-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: rgba(255,255,255,.35); cursor: pointer;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,.3); cursor: pointer;
+      transition: background var(--t-fast), transform var(--t-fast), width .2s;
+    }
+    .lb-dot.active {
+      background: var(--accent);
+      transform: scale(1.3);
+      width: 18px; border-radius: 4px;
+    }
+
+    /* ── side nav arrows ── */
+    .lb-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff; font-size: 24px;
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
       transition: background var(--t-fast), transform var(--t-fast);
+      z-index: 10; backdrop-filter: blur(8px);
     }
-    .lb-dot.active { background: var(--accent); transform: scale(1.3); }
-    .lb-title {
-      color: rgba(255,255,255,.82); text-align: center;
-      font-size: 14px; font-weight: 700; margin-top: 14px;
-      padding: 0 12px;
+    .lb-nav:hover { background: rgba(255,255,255,.28); transform: translateY(-50%) scale(1.06); }
+    .lb-prev { left: 12px; }
+    .lb-next { right: 12px; }
+    @media (max-width: 480px) {
+      .lb-nav { width: 40px; height: 40px; font-size: 20px; }
+      .lb-prev { left: 6px; }
+      .lb-next { right: 6px; }
     }
-    .lb-counter-text {
-      color: rgba(255,255,255,.5); font-size: 12px; text-align: center; margin-top: 4px;
+
+    /* thumbnail strip */
+    .lb-thumbstrip {
+      display: flex; gap: 6px; overflow-x: auto;
+      max-width: min(100%, 420px);
+      scrollbar-width: none; padding: 0 2px;
+    }
+    .lb-thumbstrip::-webkit-scrollbar { display: none; }
+    .lb-thumb {
+      width: 52px; height: 52px; flex-shrink: 0;
+      border-radius: 8px; overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer; opacity: .55;
+      transition: opacity var(--t-fast), border-color var(--t-fast), transform var(--t-fast);
+    }
+    .lb-thumb.active { border-color: var(--accent); opacity: 1; transform: scale(1.06); }
+    .lb-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lb-thumb-emoji {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
     }
 
     /* ══════════════════════════════════════
@@ -1408,14 +1491,30 @@
    IMAGE LIGHTBOX
 ══════════════════════════════════════ -->
 <div id="lightbox" role="dialog" aria-label="عارض الصور" aria-modal="true">
-  <button class="lb-close" id="lb-close" aria-label="إغلاق">✕</button>
-  <div class="lb-inner">
-    <div class="lb-stage" id="lb-stage"></div>
-    <button class="lb-nav lb-prev" id="lb-prev" aria-label="السابق">›</button>
-    <button class="lb-nav lb-next" id="lb-next" aria-label="التالي">‹</button>
+
+  <!-- full-screen image stage -->
+  <div class="lb-stage" id="lb-stage">
+    <div class="lb-swipe-hint" id="lb-swipe-hint">← مرر بين الصور →</div>
+  </div>
+
+  <!-- left/right nav arrows (inside stage visually, outside in DOM) -->
+  <button class="lb-nav lb-prev" id="lb-prev" aria-label="الصورة السابقة">›</button>
+  <button class="lb-nav lb-next" id="lb-next" aria-label="الصورة التالية">‹</button>
+
+  <!-- top bar: close + title + counter -->
+  <div class="lb-topbar">
+    <button class="lb-close" id="lb-close" aria-label="إغلاق">✕</button>
+    <div class="lb-topbar-info">
+      <div class="lb-title" id="lb-title"></div>
+      <div class="lb-counter-text" id="lb-counter"></div>
+    </div>
+    <div style="width:40px"></div><!-- spacer to center title -->
+  </div>
+
+  <!-- bottom bar: dots + thumbnail strip -->
+  <div class="lb-bottombar">
     <div class="lb-dots" id="lb-dots"></div>
-    <div class="lb-title" id="lb-title"></div>
-    <div class="lb-counter-text" id="lb-counter"></div>
+    <div class="lb-thumbstrip" id="lb-thumbstrip"></div>
   </div>
 </div>
 
@@ -1664,60 +1763,138 @@ let lbImages = [];
 let lbIdx = 0;
 let lbCat = '';
 let lbProductTitle = '';
+let lbSwipeHintShown = false;
 
 function openLightbox(product, startIdx) {
   lbImages = product.imgs;
   lbIdx = startIdx || 0;
   lbCat = product.cat;
   lbProductTitle = product.title;
-  renderLightbox();
-  document.getElementById('lightbox').classList.add('open');
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('open');
   document.body.style.overflow = 'hidden';
+  renderLightbox();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => lb.classList.add('visible'));
+  });
   document.getElementById('lb-close').focus();
+
+  // Show swipe hint briefly on first open if multi-image
+  if (!lbSwipeHintShown && lbImages.length > 1) {
+    lbSwipeHintShown = true;
+    const hint = document.getElementById('lb-swipe-hint');
+    hint.classList.add('show');
+    setTimeout(() => hint.classList.remove('show'), 2400);
+  }
 }
 
 function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('visible');
+  setTimeout(() => {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }, 260);
 }
 
 function renderLightbox() {
-  const stage = document.getElementById('lb-stage');
-  const dots = document.getElementById('lb-dots');
-  const title = document.getElementById('lb-title');
-  const counter = document.getElementById('lb-counter');
-  const img = lbImages[lbIdx];
+  const stage    = document.getElementById('lb-stage');
+  const dots     = document.getElementById('lb-dots');
+  const strip    = document.getElementById('lb-thumbstrip');
+  const titleEl  = document.getElementById('lb-title');
+  const counter  = document.getElementById('lb-counter');
+  const img      = lbImages[lbIdx];
+  const hint     = document.getElementById('lb-swipe-hint');
 
-  // clear classes
+  // update stage background class
   stage.className = 'lb-stage ' + lbCat;
+  // re-attach hint
+  if (!stage.contains(hint)) stage.appendChild(hint);
 
+  // render main image
   if (img.type === 'url') {
-    stage.innerHTML = `<div class="lb-img-loading"></div><img src="${img.v}" alt="${lbProductTitle}" loading="lazy" style="opacity:0;transition:opacity .3s" />`;
-    const imgEl = stage.querySelector('img');
+    // remove previous image/loader if any
+    stage.querySelectorAll('img, .lb-img-loading').forEach(el => el.remove());
+    const loader = document.createElement('div');
+    loader.className = 'lb-img-loading';
+    stage.appendChild(loader);
+    const imgEl = document.createElement('img');
+    imgEl.alt = lbProductTitle;
+    stage.appendChild(imgEl);
     const onLoad = () => {
-      imgEl.style.opacity = '1';
-      const loader = stage.querySelector('.lb-img-loading');
-      if (loader) loader.style.opacity = '0';
+      imgEl.classList.add('lb-loaded');
+      loader.classList.add('hidden');
     };
+    imgEl.src = img.v;
     if (imgEl.complete && imgEl.naturalWidth) onLoad();
     else imgEl.addEventListener('load', onLoad);
+    imgEl.addEventListener('error', () => {
+      loader.classList.add('hidden');
+      imgEl.style.display = 'none';
+      const fb = document.createElement('span');
+      fb.style.cssText = 'position:absolute;font-size:80px;';
+      fb.textContent = '🖼️';
+      stage.appendChild(fb);
+    });
   } else {
-    stage.innerHTML = img.v;
+    stage.querySelectorAll('img, .lb-img-loading').forEach(el => el.remove());
+    const fb = document.createElement('span');
+    fb.style.cssText = 'font-size:100px;';
+    fb.textContent = img.v;
+    stage.appendChild(fb);
   }
 
+  // dots
   dots.innerHTML = lbImages.map((_, i) =>
-    `<div class="lb-dot${i===lbIdx?' active':''}" data-i="${i}"></div>`
+    `<div class="lb-dot${i===lbIdx?' active':''}" data-i="${i}" role="button" aria-label="صورة ${i+1}"></div>`
   ).join('');
   dots.querySelectorAll('.lb-dot').forEach(d =>
     d.addEventListener('click', () => { lbIdx=+d.dataset.i; renderLightbox(); })
   );
 
-  title.textContent = lbProductTitle;
-  counter.textContent = `${lbIdx+1} / ${lbImages.length}`;
+  // thumbnail strip (only if >1 image)
+  if (lbImages.length > 1) {
+    strip.style.display = '';
+    strip.innerHTML = lbImages.map((im, i) => {
+      const isActive = i === lbIdx ? ' active' : '';
+      const content = im.type === 'url'
+        ? `<img src="${im.v}" alt="صورة ${i+1}" loading="lazy" />`
+        : `<div class="lb-thumb-emoji">${im.v}</div>`;
+      return `<div class="lb-thumb${isActive}" data-i="${i}">${content}</div>`;
+    }).join('');
+    // scroll active thumb into view
+    const activeThumb = strip.querySelector('.lb-thumb.active');
+    if (activeThumb) activeThumb.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    strip.querySelectorAll('.lb-thumb').forEach(th =>
+      th.addEventListener('click', () => { lbIdx=+th.dataset.i; renderLightbox(); })
+    );
+  } else {
+    strip.style.display = 'none';
+  }
 
-  document.getElementById('lb-prev').style.display = lbImages.length > 1 ? '' : 'none';
-  document.getElementById('lb-next').style.display = lbImages.length > 1 ? '' : 'none';
+  titleEl.textContent = lbProductTitle;
+  counter.textContent = lbImages.length > 1 ? `${lbIdx+1} / ${lbImages.length}` : '';
+
+  document.getElementById('lb-prev').style.visibility = lbImages.length > 1 ? 'visible' : 'hidden';
+  document.getElementById('lb-next').style.visibility = lbImages.length > 1 ? 'visible' : 'hidden';
 }
+
+/* touch swipe on lightbox */
+(function initLbSwipe() {
+  let tx = 0, started = false;
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    tx = e.touches[0].clientX; started = true;
+  }, { passive: true });
+  lb.addEventListener('touchend', e => {
+    if (!started) return; started = false;
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) < 45) return;
+    if (dx < 0) { lbIdx=(lbIdx+1)%lbImages.length; renderLightbox(); }
+    else        { lbIdx=(lbIdx-1+lbImages.length)%lbImages.length; renderLightbox(); }
+  }, { passive: true });
+})();
 
 document.getElementById('lb-close').addEventListener('click', closeLightbox);
 document.getElementById('lb-prev').addEventListener('click', () => {
@@ -1729,7 +1906,8 @@ document.getElementById('lb-next').addEventListener('click', () => {
   renderLightbox();
 });
 document.getElementById('lightbox').addEventListener('click', e => {
-  if (e.target === document.getElementById('lightbox')) closeLightbox();
+  if (e.target === document.getElementById('lb-stage') ||
+      e.target === document.getElementById('lightbox')) closeLightbox();
 });
 document.addEventListener('keydown', e => {
   const lb = document.getElementById('lightbox');
@@ -1742,7 +1920,14 @@ document.addEventListener('keydown', e => {
 /* ─── CARD HTML ─── */
 function cardHTML(p) {
   const catLabel = CAT_LABELS[p.cat];
-  const waMsg = `مرحباً! أنا مهتم بهذا العرض من منصة سكنى العبور\nالمنتج: ${p.title}\nالسعر: ${p.price}\nالموقع: ${p.loc}\nالفئة: ${catLabel}`;
+  // Build a product deep-link anchor: current page URL + #product-{id}
+  const productLink = `${location.origin}${location.pathname}#product-${p.id}`;
+  const waMsg = `مرحباً! أنا مهتم بهذا العرض من منصة سكنى العبور 🏠\n` +
+    `المنتج: ${p.title}\n` +
+    `السعر: ${p.price}\n` +
+    `الموقع: ${p.loc}\n` +
+    `الفئة: ${catLabel}\n` +
+    `🔗 رابط المنتج: ${productLink}`;
   const url = waURL(waMsg);
   const priceHTML = p.price === 'اتصل للسعر'
     ? `<span class="price-call">📞 اتصل للسعر</span>`
@@ -1768,7 +1953,7 @@ function cardHTML(p) {
        </div>`
     : `<div class="card-img-main ${p.cat}">${firstImg.v}</div>`;
 
-  return `<article class="listing-card" data-id="${p.id}">
+  return `<article class="listing-card" id="product-${p.id}" data-id="${p.id}">
     <div class="card-imgs" role="button" tabindex="0"
       aria-label="عرض صور ${p.title}"
       data-product-id="${p.id}">
@@ -2246,6 +2431,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeader();
   initForm();
   initJoin();
+
+  // Deep-link: if URL has #product-N, scroll to & highlight that card
+  const hash = location.hash;
+  if (hash && hash.startsWith('#product-')) {
+    const pid = hash.replace('#product-', '');
+    setTimeout(() => {
+      const card = document.getElementById(`product-${pid}`);
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.transition = 'box-shadow .3s, transform .3s';
+      card.style.boxShadow = '0 0 0 3px var(--accent), 0 12px 40px rgba(230,168,23,.35)';
+      card.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        card.style.boxShadow = '';
+        card.style.transform = '';
+      }, 2200);
+    }, 500);
+  }
 });
 </script>
 </body>
